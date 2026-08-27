@@ -21,7 +21,7 @@ const {
 } = require('../controllers/quizController');
 
 // Admin — list all quizzes
-router.get('/', protect, getAdminQuizzes);
+router.get(['/', ''], protect, getAdminQuizzes);
 
 // Create quiz (protected)
 router.post(

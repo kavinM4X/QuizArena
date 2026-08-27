@@ -22,7 +22,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const { data } = await api.get('/quiz');
+        const { data } = await api.get('/quiz/');
         setQuizzes(data.quizzes || []);
       } catch (err) {
         console.error(err);
