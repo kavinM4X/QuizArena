@@ -1,0 +1,13 @@
+.btn { display:flex; align-items:center; justify-content:center; gap:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.01em; transition:all .15s ease; border-radius:13px; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.full { width:100%; }
+.md { padding:15px 20px; font-size:15px; }
+.sm { padding:10px 14px; font-size:13px; border-radius:10px; }
+.primary { background:var(--gold); color:#1A1204; }
+.primary:hover:not(:disabled) { background:#ffc43d; transform:translateY(-1px); box-shadow:0 6px 20px rgba(255,182,39,.3); }
+.violet { background:var(--violet); color:#0B1220; }
+.violet:hover:not(:disabled) { background:#9f95ff; }
+.outline { background:transparent; border:1.5px solid var(--border); color:var(--text); }
+.outline:hover:not(:disabled) { border-color:var(--violet); color:var(--violet); }
+.spinner { display:inline-block; width:18px; height:18px; border:2px solid rgba(255,255,255,.2); border-top-color:currentColor; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }

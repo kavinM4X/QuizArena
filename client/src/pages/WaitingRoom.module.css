@@ -1,0 +1,41 @@
+.page { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.content { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 28px 24px; max-width: 380px; }
+
+/* Pulse rings — exact match to prototype */
+.pulseWrap {
+  position: relative; width: 140px; height: 140px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 32px;
+}
+.pulseRing {
+  position: absolute; width: 140px; height: 140px; border-radius: 50%;
+  border: 2px solid var(--violet); opacity: 0;
+  animation: pulse 2.4s ease-out infinite;
+}
+.d2 { animation-delay: 0.8s; }
+.d3 { animation-delay: 1.6s; }
+@keyframes pulse {
+  0% { transform: scale(0.5); opacity: 0.7; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.pulseCore {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  font-size: 24px; color: var(--violet);
+  position: relative; z-index: 1;
+}
+
+.title { font-size: 20px; margin-bottom: 10px; }
+.sub { color: var(--mute); font-size: 13px; max-width: 240px; line-height: 1.6; }
+
+.codeCard {
+  margin-top: 28px; padding: 10px 20px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+}
+.codeLbl { font-size: 10px; color: var(--mute); text-transform: uppercase; letter-spacing: 0.08em; }
+.codeVal { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-weight: 700; font-size: 16px; letter-spacing: 0.1em; }
+
+.playerBadge { margin-top: 14px; font-size: 13px; color: var(--mute); }
+.playerBadge strong { color: var(--text); }

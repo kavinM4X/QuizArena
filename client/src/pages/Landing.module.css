@@ -1,0 +1,29 @@
+.page { min-height: 100vh; display: flex; align-items: stretch; }
+.centerCol {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; flex: 1;
+  justify-content: space-between;
+  padding: 10vh 28px 36px;
+  max-width: 440px; margin: 0 auto; width: 100%;
+}
+.topBlock { margin-top: 0; }
+.logoMark {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px;
+  color: #0B1220; margin: 0 auto 18px;
+}
+.title { font-size: 26px; margin-bottom: 10px; }
+.sub { color: var(--mute); font-size: 14px; max-width: 280px; margin: 0 auto; }
+.bottomBlock { width: 100%; }
+.field { margin-bottom: 14px; text-align: left; }
+.label { display: block; font-size: 12px; font-weight: 600; color: var(--mute); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.06em; }
+.codeInput {
+  width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: var(--text);
+  padding: 16px; border-radius: 12px; font-size: 22px;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3em;
+  text-align: center; text-transform: uppercase;
+}
+.codeInput::placeholder { letter-spacing: 0.3em; font-size: 16px; color: #54607C; }
+.codeInput:focus { outline: none; border-color: var(--violet); }

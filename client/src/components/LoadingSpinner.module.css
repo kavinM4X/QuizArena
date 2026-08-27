@@ -1,0 +1,2 @@
+.s { display:inline-block; border:3px solid rgba(255,255,255,.12); border-top-color:var(--gold); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }

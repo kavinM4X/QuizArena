@@ -1,0 +1,50 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 32px;
+}
+.hero { text-align: center; margin-bottom: 30px; }
+.logoMark {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #0B1220;
+  margin: 0 auto 14px;
+}
+.title { font-size: 22px; margin-bottom: 6px; }
+.sub { color: var(--mute); font-size: 13px; }
+
+.switchRow {
+  text-align: center;
+  color: var(--mute);
+  font-size: 13px;
+  margin-top: 20px;
+}
+.switchBtn {
+  background: none;
+  border: none;
+  color: var(--violet);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+.switchBtn:hover { text-decoration: underline; }

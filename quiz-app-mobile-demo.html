@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUIZZO — Mobile Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B1220;
+    --surface:#141D2E;
+    --surface-2:#1C2740;
+    --border:#263252;
+    --text:#F1F4FA;
+    --mute:#8493B0;
+    --gold:#FFB627;
+    --violet:#8B7FFF;
+    --coral:#FF6B5B;
+    --teal:#2DD4BF;
+    --blue:#4EA1FF;
+    --success:#3DDC97;
+    --danger:#FF5D73;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:#060A12;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(139,127,255,0.10), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(255,182,39,0.08), transparent 45%);
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  h1,h2,h3, .display{ font-family:'Space Grotesk',sans-serif; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+
+  /* ---- switcher chrome (demo harness, not part of the app) ---- */
+  .harness-head{ max-width:1100px; margin:0 auto 22px; }
+  .harness-head .eyebrow{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); font-family:'JetBrains Mono',monospace; margin-bottom:6px;}
+  .harness-head h1{ font-size:26px; margin-bottom:4px; }
+  .harness-head p{ color:var(--mute); font-size:14px; max-width:520px; }
+
+  .groups{ max-width:1100px; margin:0 auto 28px; display:flex; flex-direction:column; gap:10px; }
+  .group-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .group-label{ font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--mute); width:64px; flex-shrink:0; }
+  .pill{
+    border:1px solid var(--border); background:var(--surface); color:var(--mute);
+    font-size:13px; font-weight:600; padding:8px 14px; border-radius:999px; cursor:pointer;
+    transition:all .15s ease; white-space:nowrap; font-family:'Inter',sans-serif;
+  }
+  .pill:hover{ border-color:var(--violet); color:var(--text); }
+  .pill.active{ background:var(--violet); border-color:var(--violet); color:#0B1220; }
+  .pill.active.gold{ background:var(--gold); border-color:var(--gold); }
+
+  /* ---- phone frame ---- */
+  .stage{ display:flex; justify-content:center; }
+  .phone{
+    width:375px; max-width:92vw;
+    background:#000;
+    border-radius:46px;
+    padding:12px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .phone-screen{
+    background:var(--bg);
+    border-radius:34px;
+    overflow:hidden;
+    height:780px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:110px; height:22px; background:#000; border-radius:20px; z-index:20;
+  }
+  .statusbar{ height:44px; flex-shrink:0; }
+
+  .screen{ display:none; flex-direction:column; height:100%; }
+  .screen.active{ display:flex; }
+
+  .content{ flex:1; overflow-y:auto; padding:22px 20px 20px; }
+  .content::-webkit-scrollbar{ display:none; }
+
+  /* ---- shared components ---- */
+  .logo-mark{
+    width:44px; height:44px; border-radius:12px;
+    background:linear-gradient(135deg, var(--violet), var(--blue));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#0B1220;
+  }
+  .brand-row{ display:flex; align-items:center; gap:10px; }
+  .brand-row .name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; letter-spacing:-.01em;}
+  .brand-row .name span{ color:var(--gold); }
+
+  label{ display:block; font-size:12px; font-weight:600; color:var(--mute); margin-bottom:7px; text-transform:uppercase; letter-spacing:.06em; }
+  .field{ margin-bottom:16px; }
+  input[type=text], input[type=email], input[type=password], input[type=number]{
+    width:100%; background:var(--surface); border:1.5px solid var(--border); color:var(--text);
+    padding:14px 15px; border-radius:12px; font-size:15px; font-family:'Inter',sans-serif; outline:none;
+  }
+  input::placeholder{ color:#54607C; }
+  input:focus{ border-color:var(--violet); }
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:15px; border-radius:13px; border:none; cursor:pointer;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:15px; letter-spacing:.01em;
+  }
+  .btn-primary{ background:var(--gold); color:#1A1204; }
+  .btn-violet{ background:var(--violet); color:#0B1220; }
+  .btn-outline{ background:transparent; border:1.5px solid var(--border); color:var(--text); }
+  .btn-danger{ background:transparent; border:1.5px solid var(--danger); color:var(--danger); }
+  .btn-success{ background:var(--success); color:#062017; }
+  .btn-sm{ padding:10px; font-size:13px; border-radius:10px; }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; }
+  .stack{ display:flex; flex-direction:column; gap:12px; }
+
+  .bottom-bar{ padding:16px 20px 22px; border-top:1px solid var(--border); background:rgba(20,29,46,0.6); flex-shrink:0; }
+  .bottom-bar .stack{ gap:10px; }
+
+  .topbar{ padding:18px 20px 4px; flex-shrink:0; }
+
+  /* login */
+  .login-hero{ text-align:center; margin:26px 0 30px; }
+  .login-hero .logo-mark{ margin:0 auto 14px; width:56px; height:56px; font-size:22px; border-radius:16px; }
+  .login-hero h2{ font-size:20px; margin-bottom:6px; }
+  .login-hero p{ color:var(--mute); font-size:13px; }
+  .divider-note{ text-align:center; color:var(--mute); font-size:12px; margin-top:16px; }
+
+  /* dashboard */
+  .greet{ margin-bottom:18px; }
+  .greet .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--mute); text-transform:uppercase; letter-spacing:.1em; }
+  .greet h2{ font-size:21px; margin-top:4px; }
+  .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .stat-grid .card.full{ grid-column:1/-1; }
+  .stat-card .num{ font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; }
+  .stat-card .lbl{ color:var(--mute); font-size:12px; margin-top:4px; }
+  .stat-card.accent .num{ color:var(--teal); }
+  .stat-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); display:inline-block; margin-right:6px; box-shadow:0 0 0 4px rgba(61,220,151,0.15); }
+
+  .section-lbl{ font-size:12px; font-weight:700; color:var(--mute); text-transform:uppercase; letter-spacing:.08em; margin:18px 0 10px; }
+  .quiz-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 14px; }
+  .quiz-row .qname{ font-weight:600; font-size:14px; }
+  .quiz-row .qmeta{ color:var(--mute); font-size:12px; margin-top:2px; }
+  .badge{ font-family:'JetBrains Mono',monospace; font-size:11px; padding:4px 9px; border-radius:7px; background:var(--surface-2); color:var(--mute); }
+  .badge.live{ background:rgba(61,220,151,0.14); color:var(--success); }
+
+  /* create quiz */
+  .code-chip{ display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px dashed var(--border); border-radius:12px; padding:12px 14px; margin-bottom:16px; }
+  .code-chip .val{ font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700; letter-spacing:.12em; color:var(--gold); }
+  .code-chip .lbl{ font-size:10px; color:var(--mute); text-transform:uppercase; letter-spacing:.08em; }
+
+  .q-card{ position:relative; }
+  .q-card .q-num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--violet); margin-bottom:10px; }
+  .opt-row{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .opt-letter{ width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; font-family:'Space Grotesk',sans-serif;}
+  .opt-letter.a{ background:rgba(139,127,255,0.18); color:var(--violet); }
+  .opt-letter.b{ background:rgba(255,107,91,0.18); color:var(--coral); }
+  .opt-letter.c{ background:rgba(45,212,191,0.18); color:var(--teal); }
+  .opt-letter.d{ background:rgba(78,161,255,0.18); color:var(--blue); }
+  .opt-row input{ padding:10px 12px; font-size:13px; }
+  .radio-check{ width:18px; height:18px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; }
+  .radio-check.correct{ border-color:var(--success); background:var(--success); }
+  .add-q-btn{ border:1.5px dashed var(--border); background:transparent; color:var(--mute); border-radius:13px; padding:13px; width:100%; font-weight:600; font-size:13px; cursor:pointer; }
+
+  /* live control */
+  .live-code{ text-align:center; padding:20px 0 10px; }
+  .live-code .lbl{ font-size:11px; color:var(--mute); text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px; }
+  .live-code .val{ font-family:'JetBrains Mono',monospace; font-size:38px; font-weight:700; letter-spacing:.14em; color:var(--gold); }
+  .participants-strip{ display:flex; align-items:center; gap:8px; justify-content:center; margin:14px 0 20px; }
+  .avatar-stack{ display:flex; }
+  .avatar-stack .av{ width:26px; height:26px; border-radius:50%; border:2px solid var(--bg); margin-left:-8px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+  .avatar-stack .av:first-child{ margin-left:0; }
+  .p-count{ font-size:13px; color:var(--mute); }
+  .p-count b{ color:var(--text); }
+
+  .lb-row{ display:flex; align-items:center; gap:10px; padding:11px 12px; }
+  .lb-rank{ font-family:'JetBrains Mono',monospace; font-weight:700; width:22px; color:var(--mute); font-size:13px; }
+  .lb-rank.gold{ color:var(--gold); }
+  .lb-name{ flex:1; font-size:14px; font-weight:600; }
+  .lb-score{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; color:var(--teal); }
+  .ctrl-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+
+  /* results */
+  .res-row{ display:flex; align-items:center; gap:12px; padding:13px; }
+  .res-rank-badge{ width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; background:var(--surface-2); color:var(--mute); flex-shrink:0; }
+  .res-rank-badge.g1{ background:rgba(255,182,39,0.18); color:var(--gold); }
+  .res-rank-badge.g2{ background:rgba(226,226,232,0.14); color:#D8DCE6; }
+  .res-rank-badge.g3{ background:rgba(255,107,91,0.14); color:var(--coral); }
+  .res-name{ flex:1; font-size:14px; font-weight:600; }
+  .res-score{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px; }
+
+  /* landing / join */
+  .center-col{ display:flex; flex-direction:column; align-items:center; text-align:center; height:100%; justify-content:space-between; padding:36px 24px 26px; }
+  .center-col .top-block{ margin-top:10%; }
+  .center-col .logo-mark{ margin:0 auto 18px; width:64px; height:64px; font-size:26px; border-radius:18px; }
+  .center-col h1.display{ font-size:26px; margin-bottom:8px; }
+  .center-col p.sub{ color:var(--mute); font-size:14px; max-width:260px; }
+  .code-input{ text-align:center; font-family:'JetBrains Mono',monospace; font-size:22px; letter-spacing:.3em; padding:16px; }
+  .code-input::placeholder{ letter-spacing:.3em; font-size:16px;}
+
+  /* waiting room */
+  .pulse-wrap{ display:flex; align-items:center; justify-content:center; margin:14% 0 30px; position:relative; height:140px; }
+  .pulse-ring{ position:absolute; width:140px; height:140px; border-radius:50%; border:2px solid var(--violet); opacity:0; animation:pulse 2.4s ease-out infinite; }
+  .pulse-ring.d2{ animation-delay:.8s; }
+  .pulse-ring.d3{ animation-delay:1.6s; }
+  @keyframes pulse{ 0%{ transform:scale(.5); opacity:.7;} 100%{ transform:scale(1.4); opacity:0;} }
+  .pulse-core{ width:76px; height:76px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; color:var(--violet); }
+
+  /* quiz page */
+  .quiz-topbar{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px 8px; }
+  .qprogress{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--mute); }
+  .timer-ring{ position:relative; width:52px; height:52px; }
+  .timer-ring svg{ transform:rotate(-90deg); }
+  .timer-ring .tval{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; }
+  .q-text{ font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:700; line-height:1.35; margin:18px 0 22px; }
+  .opt-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .opt-tile{ border-radius:14px; padding:18px 12px; display:flex; flex-direction:column; gap:8px; min-height:92px; justify-content:center; }
+  .opt-tile .letter{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; opacity:.75; }
+  .opt-tile .txt{ font-size:14px; font-weight:600; }
+  .opt-tile.a{ background:rgba(139,127,255,0.14); border:1.5px solid rgba(139,127,255,0.35); }
+  .opt-tile.b{ background:rgba(255,107,91,0.14); border:1.5px solid rgba(255,107,91,0.35); }
+  .opt-tile.c{ background:rgba(45,212,191,0.14); border:1.5px solid rgba(45,212,191,0.35); }
+  .opt-tile.d{ background:rgba(78,161,255,0.14); border:1.5px solid rgba(78,161,255,0.35); }
+
+  /* result page */
+  .score-hero{ text-align:center; padding:14% 0 20px; }
+  .score-hero .big{ font-family:'Space Grotesk',sans-serif; font-size:56px; font-weight:700; color:var(--gold); line-height:1; }
+  .score-hero .of{ color:var(--mute); font-size:14px; margin-top:6px; }
+  .metric-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:22px 0; }
+  .metric-grid .card .num{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; }
+  .metric-grid .card .lbl{ color:var(--mute); font-size:11px; text-transform:uppercase; letter-spacing:.06em; margin-top:4px;}
+  .thankyou{ text-align:center; color:var(--mute); font-size:13px; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<div class="harness-head">
+  <div class="eyebrow">Clickable mobile prototype</div>
+  <h1>QUIZZO — Screen by screen</h1>
+  <p>All 10 pages from your plan, built to mobile width (375px). Tap a pill below to switch screens.</p>
+</div>
+
+<div class="groups">
+  <div class="group-row">
+    <span class="group-label">Admin</span>
+    <button class="pill gold active" data-screen="a1">1 · Login</button>
+    <button class="pill gold" data-screen="a2">2 · Dashboard</button>
+    <button class="pill gold" data-screen="a3">3 · Create Quiz</button>
+    <button class="pill gold" data-screen="a4">4 · Live Control</button>
+    <button class="pill gold" data-screen="a5">5 · Results</button>
+  </div>
+  <div class="group-row">
+    <span class="group-label">Client</span>
+    <button class="pill" data-screen="c1">1 · Landing</button>
+    <button class="pill" data-screen="c2">2 · Join Quiz</button>
+    <button class="pill" data-screen="c3">3 · Waiting Room</button>
+    <button class="pill" data-screen="c4">4 · Quiz Page</button>
+    <button class="pill" data-screen="c5">5 · Result</button>
+  </div>
+</div>
+
+<div class="stage">
+<div class="phone">
+<div class="phone-screen">
+<div class="notch"></div>
+
+  <!-- ================= ADMIN 1: LOGIN ================= -->
+  <div class="screen active" id="a1">
+    <div class="statusbar"></div>
+    <div class="content">
+      <div class="login-hero">
+        <div class="logo-mark">Q</div>
+        <h2>Admin Sign In</h2>
+        <p>Host live quizzes in seconds</p>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" placeholder="you@school.edu">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" style="margin-top:6px;">Login</button>
+      <div class="divider-note">Forgot password? Contact your organizer.</div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN 2: DASHBOARD ================= -->
+  <div class="screen" id="a2">
+    <div class="topbar">
+      <div class="brand-row">
+        <div class="logo-mark" style="width:34px;height:34px;font-size:14px;border-radius:9px;">Q</div>
+        <div class="name">QUIZ<span>ZO</span></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="greet">
+        <div class="eyebrow">Monday, July 27</div>
+        <h2>Welcome back, Asha</h2>
+      </div>
+      <div class="stat-grid">
+        <div class="card stat-card">
+          <div class="num">18</div>
+          <div class="lbl">Total Quizzes</div>
+        </div>
+        <div class="card stat-card accent">
+          <div class="num"><span class="stat-dot"></span>1</div>
+          <div class="lbl">Active Quiz</div>
+        </div>
+        <div class="card stat-card full">
+          <div class="num">142</div>
+          <div class="lbl">Participants (all time)</div>
+        </div>
+      </div>
+      <button class="btn btn-primary">+ Create Quiz</button>
+
+      <div class="section-lbl">Recent quizzes</div>
+      <div class="stack">
+        <div class="card quiz-row">
+          <div>
+            <div class="qname">General Knowledge Sprint</div>
+            <div class="qmeta">Code AK47X2 · 24 players</div>
+          </div>
+          <span class="badge live">Live</span>
+        </div>
+        <div class="card quiz-row">
+          <div>
+            <div class="qname">Science Chapter 4</div>
+            <div class="qmeta">Code B7Q1TZ · 31 players</div>
+          </div>
+          <span class="badge">Ended</span>
+        </div>
+        <div class="card quiz-row">
+          <div>
+            <div class="qname">History Buzzer Round</div>
+            <div class="qmeta">Code M09PLD · 19 players</div>
+          </div>
+          <span class="badge">Ended</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN 3: CREATE QUIZ ================= -->
+  <div class="screen" id="a3">
+    <div class="topbar">
+      <div class="brand-row"><h3 style="font-size:16px;">Create Quiz</h3></div>
+    </div>
+    <div class="content">
+      <div class="field">
+        <label>Quiz Title</label>
+        <input type="text" placeholder="e.g. General Knowledge Sprint">
+      </div>
+      <div class="code-chip">
+        <div>
+          <div class="lbl">Quiz Code (auto-generated)</div>
+          <div class="val">AK47X2</div>
+        </div>
+        <button class="pill" style="padding:6px 10px;">Regenerate</button>
+      </div>
+
+      <div class="section-lbl">Question 1 of 4</div>
+      <div class="card q-card">
+        <div class="field" style="margin-bottom:12px;">
+          <input type="text" placeholder="Type your question">
+        </div>
+        <div class="opt-row">
+          <div class="opt-letter a">A</div>
+          <input type="text" placeholder="Option A">
+          <div class="radio-check"></div>
+        </div>
+        <div class="opt-row">
+          <div class="opt-letter b">B</div>
+          <input type="text" placeholder="Option B">
+          <div class="radio-check correct"></div>
+        </div>
+        <div class="opt-row">
+          <div class="opt-letter c">C</div>
+          <input type="text" placeholder="Option C">
+          <div class="radio-check"></div>
+        </div>
+        <div class="opt-row" style="margin-bottom:0;">
+          <div class="opt-letter d">D</div>
+          <input type="text" placeholder="Option D">
+          <div class="radio-check"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="add-q-btn">+ Add Question</button>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn btn-primary">Save Quiz</button>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN 4: LIVE CONTROL ================= -->
+  <div class="screen" id="a4">
+    <div class="topbar">
+      <div class="brand-row"><h3 style="font-size:16px;">Live Control</h3></div>
+    </div>
+    <div class="content">
+      <div class="live-code">
+        <div class="lbl">Quiz Code</div>
+        <div class="val">AK47X2</div>
+      </div>
+      <div class="participants-strip">
+        <div class="avatar-stack">
+          <div class="av" style="background:var(--violet);color:#0B1220;">R</div>
+          <div class="av" style="background:var(--teal);color:#0B1220;">S</div>
+          <div class="av" style="background:var(--coral);color:#0B1220;">M</div>
+          <div class="av" style="background:var(--surface-2);color:var(--mute);">+</div>
+        </div>
+        <div class="p-count"><b>24</b> joined</div>
+      </div>
+
+      <div class="ctrl-grid">
+        <button class="btn btn-violet btn-sm">Start Quiz</button>
+        <button class="btn btn-outline btn-sm">Next Question</button>
+      </div>
+      <button class="btn btn-danger btn-sm" style="margin-bottom:18px;">End Quiz</button>
+
+      <div class="section-lbl">Live Leaderboard</div>
+      <div class="stack" style="gap:8px;">
+        <div class="card lb-row">
+          <div class="lb-rank gold">1</div>
+          <div class="lb-name">Rhea Nair</div>
+          <div class="lb-score">980</div>
+        </div>
+        <div class="card lb-row">
+          <div class="lb-rank">2</div>
+          <div class="lb-name">Sam Verghese</div>
+          <div class="lb-score">870</div>
+        </div>
+        <div class="card lb-row">
+          <div class="lb-rank">3</div>
+          <div class="lb-name">Meera Iyer</div>
+          <div class="lb-score">810</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN 5: RESULTS ================= -->
+  <div class="screen" id="a5">
+    <div class="topbar">
+      <div class="brand-row"><h3 style="font-size:16px;">Final Results</h3></div>
+    </div>
+    <div class="content">
+      <div class="stack" style="gap:8px;">
+        <div class="card res-row">
+          <div class="res-rank-badge g1">1</div>
+          <div class="res-name">Rhea Nair</div>
+          <div class="res-score" style="color:var(--gold);">980</div>
+        </div>
+        <div class="card res-row">
+          <div class="res-rank-badge g2">2</div>
+          <div class="res-name">Sam Verghese</div>
+          <div class="res-score">870</div>
+        </div>
+        <div class="card res-row">
+          <div class="res-rank-badge g3">3</div>
+          <div class="res-name">Meera Iyer</div>
+          <div class="res-score">810</div>
+        </div>
+        <div class="card res-row">
+          <div class="res-rank-badge">4</div>
+          <div class="res-name">Devan Kurup</div>
+          <div class="res-score">760</div>
+        </div>
+        <div class="card res-row">
+          <div class="res-rank-badge">5</div>
+          <div class="res-name">Anika Joseph</div>
+          <div class="res-score">705</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn btn-outline">Download Results (CSV)</button>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT 1: LANDING ================= -->
+  <div class="screen" id="c1">
+    <div class="statusbar"></div>
+    <div class="content" style="display:flex;">
+      <div class="center-col">
+        <div class="top-block">
+          <div class="logo-mark">Q</div>
+          <h1 class="display">Welcome to Quizzo</h1>
+          <p class="sub">Join a live quiz hosted by your teacher or team lead.</p>
+        </div>
+        <div style="width:100%;">
+          <div class="field" style="text-align:left;">
+            <label>Enter Quiz Code</label>
+            <input class="code-input" type="text" placeholder="ABC123">
+          </div>
+          <button class="btn btn-primary">Join Quiz</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT 2: JOIN QUIZ ================= -->
+  <div class="screen" id="c2">
+    <div class="statusbar"></div>
+    <div class="content" style="display:flex;">
+      <div class="center-col">
+        <div class="top-block">
+          <span class="badge" style="margin-bottom:14px; display:inline-block;">Code: AK47X2</span>
+          <h1 class="display" style="font-size:22px;">What should we call you?</h1>
+          <p class="sub">This name will appear on the live leaderboard.</p>
+        </div>
+        <div style="width:100%;">
+          <div class="field" style="text-align:left;">
+            <label>Your Name</label>
+            <input type="text" placeholder="e.g. Rhea Nair">
+          </div>
+          <button class="btn btn-primary">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT 3: WAITING ROOM ================= -->
+  <div class="screen" id="c3">
+    <div class="statusbar"></div>
+    <div class="content" style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+      <div class="pulse-wrap">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring d2"></div>
+        <div class="pulse-ring d3"></div>
+        <div class="pulse-core">24</div>
+      </div>
+      <h2 style="font-size:19px; margin-bottom:8px;">Waiting for host to start…</h2>
+      <p style="color:var(--mute); font-size:13px; max-width:230px;">Please wait — the quiz will begin automatically. Don't close this screen.</p>
+      <div class="card" style="margin-top:26px; padding:10px 16px;">
+        <span class="lbl" style="font-size:10px; color:var(--mute); text-transform:uppercase;">Quiz Code&nbsp;</span>
+        <span class="mono" style="color:var(--gold); font-weight:700;">AK47X2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT 4: QUIZ PAGE ================= -->
+  <div class="screen" id="c4">
+    <div class="quiz-topbar">
+      <span class="qprogress">QUESTION 03 / 10</span>
+      <div class="timer-ring">
+        <svg width="52" height="52">
+          <circle cx="26" cy="26" r="22" stroke="var(--surface-2)" stroke-width="4" fill="none"/>
+          <circle cx="26" cy="26" r="22" stroke="var(--gold)" stroke-width="4" fill="none"
+                  stroke-dasharray="138" stroke-dashoffset="42" stroke-linecap="round"/>
+        </svg>
+        <div class="tval">07</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="q-text">Which planet is known as the Red Planet?</div>
+      <div class="opt-grid">
+        <div class="opt-tile a"><div class="letter">A</div><div class="txt">Venus</div></div>
+        <div class="opt-tile b"><div class="letter">B</div><div class="txt">Mars</div></div>
+        <div class="opt-tile c"><div class="letter">C</div><div class="txt">Jupiter</div></div>
+        <div class="opt-tile d"><div class="letter">D</div><div class="txt">Saturn</div></div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn btn-primary">Submit Answer</button>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT 5: RESULT PAGE ================= -->
+  <div class="screen" id="c5">
+    <div class="statusbar"></div>
+    <div class="content">
+      <div class="score-hero">
+        <div class="of">YOUR SCORE</div>
+        <div class="big">870</div>
+      </div>
+      <div class="metric-grid">
+        <div class="card">
+          <div class="num" style="color:var(--teal);">8/10</div>
+          <div class="lbl">Correct Answers</div>
+        </div>
+        <div class="card">
+          <div class="num" style="color:var(--gold);">#2</div>
+          <div class="lbl">Your Rank</div>
+        </div>
+      </div>
+      <div class="section-lbl">Top of leaderboard</div>
+      <div class="stack" style="gap:8px;">
+        <div class="card lb-row"><div class="lb-rank gold">1</div><div class="lb-name">Rhea Nair</div><div class="lb-score">980</div></div>
+        <div class="card lb-row" style="border-color:var(--violet);"><div class="lb-rank">2</div><div class="lb-name">You</div><div class="lb-score">870</div></div>
+        <div class="card lb-row"><div class="lb-rank">3</div><div class="lb-name">Meera Iyer</div><div class="lb-score">810</div></div>
+      </div>
+      <div class="thankyou">🎉 Thanks for playing — see you next round!</div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<script>
+  const pills = document.querySelectorAll('.pill');
+  const screens = document.querySelectorAll('.screen');
+  pills.forEach(p => {
+    p.addEventListener('click', () => {
+      pills.forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      screens.forEach(s => s.classList.remove('active'));
+      document.getElementById(p.dataset.screen).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

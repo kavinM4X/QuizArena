@@ -1,0 +1,31 @@
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+.center { flex: 1; display: flex; align-items: center; justify-content: center; }
+.content { max-width: 480px; margin: 0 auto; width: 100%; padding: 0 20px 48px; }
+
+/* Score hero — matches prototype exactly */
+.scoreHero { text-align: center; padding: 10vh 0 20px; }
+.scoreOf { color: var(--mute); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.scoreBig {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 64px; font-weight: 700; color: var(--gold); line-height: 1;
+}
+
+/* Metric grid */
+.metricGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 22px 0; }
+.metricCard {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
+}
+.metricNum { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
+.metricLbl { color: var(--mute); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+.sectionLbl { font-size: 12px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px; }
+
+.thankyou { text-align: center; color: var(--mute); font-size: 13px; margin-top: 18px; }
+
+.playAgainBtn {
+  width: 100%; margin-top: 18px;
+  background: transparent; border: 1.5px solid var(--border); color: var(--text);
+  padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.playAgainBtn:hover { border-color: var(--violet); color: var(--violet); }

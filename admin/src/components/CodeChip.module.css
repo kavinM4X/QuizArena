@@ -1,0 +1,33 @@
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.lbl { font-size: 10px; color: var(--mute); text-transform: uppercase; letter-spacing: 0.08em; }
+.val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  cursor: pointer;
+  user-select: all;
+}
+.regenBtn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.regenBtn:hover { border-color: var(--violet); color: var(--text); }
