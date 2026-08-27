@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { usePlayer } from '../context/PlayerContext';
+import { getCachedQuiz } from '../utils/quizCache';
 import Button from '../components/Button';
 import styles from './Join.module.css';
 
@@ -23,7 +24,10 @@ const Join = () => {
     if (!code) return;
     const fetchQuizDetails = async () => {
       try {
-        const { data } = await api.get(`/quiz/${code}`);
+        const data = await getCachedQuiz(code, async () => {
+          const res = await api.get(`/quiz/${code}`);
+          return res.data;
+        });
         const taken = data.takenAvatars || [];
         setTakenAvatars(taken);
 

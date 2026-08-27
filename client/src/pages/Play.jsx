@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { usePlayer } from '../context/PlayerContext';
 import { useSocket } from '../context/SocketContext';
+import { getCachedQuiz } from '../utils/quizCache';
 import TimerRing from '../components/TimerRing';
 import OptionTile from '../components/OptionTile';
 import Button from '../components/Button';
@@ -38,7 +39,10 @@ const Play = () => {
 
     const load = async () => {
       try {
-        const { data } = await api.get(`/quiz/${code}`);
+        const data = await getCachedQuiz(code, async () => {
+          const res = await api.get(`/quiz/${code}`);
+          return res.data;
+        });
         const q = data.quiz;
         setQuiz(q);
         setDuration(q.duration);
