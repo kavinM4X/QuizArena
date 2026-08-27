@@ -75,8 +75,8 @@ router.post(
   submitAnswer
 );
 
-// Admin — results & CSV
-router.get('/:code/results', protect, getResults);
+// Results (public) & CSV export (admin protected)
+router.get('/:code/results', getResults);
 router.get('/:code/export-csv', protect, exportCSV);
 
 module.exports = router;
