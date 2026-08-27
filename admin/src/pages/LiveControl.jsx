@@ -46,8 +46,8 @@ const LiveControl = () => {
 
   /* ── Socket connection ── */
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
-      transports: ['websocket'],
+    const socket = io(import.meta.env.VITE_SOCKET_URL || 'https://quizarena-server-dhaj.onrender.com', {
+      transports: ['websocket', 'polling'],
     });
     socketRef.current = socket;
 
