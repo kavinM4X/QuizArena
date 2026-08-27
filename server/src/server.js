@@ -48,6 +48,12 @@ app.use(generalLimiter);
 app.use('/api/admin', adminRoutes);
 app.use('/api/quiz', quizRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => res.json({
+  message: '🚀 QuizArena API Server is running!',
+  health: '/api/health',
+}));
+
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
