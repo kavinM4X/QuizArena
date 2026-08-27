@@ -2,16 +2,67 @@
 .center { flex: 1; display: flex; align-items: center; justify-content: center; }
 .content { max-width: 480px; margin: 0 auto; width: 100%; padding: 0 20px 48px; }
 
-/* Score hero — matches prototype exactly */
-.scoreHero { text-align: center; padding: 10vh 0 20px; }
-.scoreOf { color: var(--mute); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+/* Score hero */
+.scoreHero {
+  text-align: center;
+  padding: 6vh 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.avatarBig {
+  font-size: 56px;
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(255, 182, 39, 0.25);
+  margin-bottom: 8px;
+}
+
+.medalBadge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(255, 182, 39, 0.14);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 182, 39, 0.3);
+  letter-spacing: 0.04em;
+}
+
+.scoreOf {
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 .scoreBig {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 64px; font-weight: 700; color: var(--gold); line-height: 1;
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.playerNameHero {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 4px;
 }
 
 /* Metric grid */
-.metricGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 22px 0; }
+.metricGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0 24px; }
 .metricCard {
   background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
 }
@@ -20,7 +71,7 @@
 
 .sectionLbl { font-size: 12px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px; }
 
-.thankyou { text-align: center; color: var(--mute); font-size: 13px; margin-top: 18px; }
+.thankyou { text-align: center; color: var(--mute); font-size: 13px; margin-top: 20px; }
 
 .playAgainBtn {
   width: 100%; margin-top: 18px;

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
@@ -16,6 +16,7 @@ const emptyQuestion = () => ({
   question: '',
   options: ['', '', '', ''],
   correctAnswer: 0,
+  points: 1000,
 });
 
 const generateCode = () => {
@@ -25,12 +26,26 @@ const generateCode = () => {
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState([emptyQuestion()]);
+  const location = useLocation();
+  const cloneQuiz = location.state?.cloneQuiz;
+
+  const [questions, setQuestions] = useState(() => {
+    if (cloneQuiz?.questions?.length) {
+      return cloneQuiz.questions.map((q) => ({
+        question: q.question || '',
+        options: Array.isArray(q.options) ? [...q.options] : ['', '', '', ''],
+        correctAnswer: q.correctAnswer ?? 0,
+        points: q.points ?? 1000,
+      }));
+    }
+    return [emptyQuestion()];
+  });
   const [quizCode, setQuizCode] = useState(generateCode);
   const [saving, setSaving] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [duration, setDuration] = useState(30);
+  const [title, setTitle] = useState(cloneQuiz?.title ? `Copy of ${cloneQuiz.title}` : '');
+  const [description, setDescription] = useState(cloneQuiz?.description || '');
+  const [duration, setDuration] = useState(cloneQuiz?.duration || 30);
+  const [scoringMode, setScoringMode] = useState(cloneQuiz?.scoringMode || 'speed');
 
   /* ── Question helpers ── */
   const addQuestion = () => setQuestions((prev) => [...prev, emptyQuestion()]);
@@ -72,6 +87,8 @@ const CreateQuiz = () => {
         title,
         description,
         duration,
+        scoringMode,
+        quizCode,
         questions,
       });
       toast.success('Quiz created! Share the code with players.');
@@ -89,8 +106,22 @@ const CreateQuiz = () => {
       <main className={styles.main}>
         <div className={styles.topbar}>
           <button className={styles.backBtn} onClick={() => navigate('/dashboard')}>← Back</button>
-          <h2 className={styles.pageTitle}>Create Quiz</h2>
+          <h2 className={styles.pageTitle}>{cloneQuiz ? 'Edit Cloned Quiz' : 'Create Quiz'}</h2>
         </div>
+
+        {cloneQuiz && (
+          <div style={{
+            background: 'rgba(139, 127, 255, 0.12)',
+            border: '1px solid var(--violet)',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            marginBottom: '16px',
+            fontSize: '13px',
+            color: 'var(--violet)'
+          }}>
+            📋 Cloned from <strong>{cloneQuiz.title}</strong> — customize details & questions below.
+          </div>
+        )}
 
         {/* Title */}
         <Input
@@ -112,15 +143,61 @@ const CreateQuiz = () => {
         {/* Duration */}
         <div className={styles.durationRow}>
           <label className={styles.durationLabel}>Time per question (seconds)</label>
-          <select
-            className={styles.durationSelect}
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-          >
+          <div className={styles.durationInputGroup}>
+            <input
+              type="number"
+              min={3}
+              max={600}
+              className={styles.durationInput}
+              value={duration}
+              onChange={(e) => setDuration(Math.max(1, Number(e.target.value)))}
+              placeholder="e.g. 30"
+            />
+            <span className={styles.secSuffix}>seconds</span>
+          </div>
+
+          <div className={styles.presetRow}>
             {[10, 15, 20, 30, 45, 60, 90, 120].map((s) => (
-              <option key={s} value={s}>{s}s</option>
+              <button
+                key={s}
+                type="button"
+                className={`${styles.presetBtn} ${duration === s ? styles.presetActive : ''}`}
+                onClick={() => setDuration(s)}
+              >
+                {s}s
+              </button>
             ))}
-          </select>
+          </div>
+        </div>
+
+        {/* Scoring Mode Toggle */}
+        <div className={styles.scoringRow}>
+          <label className={styles.durationLabel}>Scoring Rule</label>
+          <div className={styles.scoringGrid}>
+            <button
+              type="button"
+              className={`${styles.scoringCard} ${scoringMode === 'speed' ? styles.scoringActive : ''}`}
+              onClick={() => setScoringMode('speed')}
+            >
+              <span className={styles.scoringIcon}>⚡</span>
+              <div className={styles.scoringText}>
+                <div className={styles.scoringTitle}>Speed Bonus (Kahoot Style)</div>
+                <div className={styles.scoringSub}>Base pts + extra bonus for faster answers</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.scoringCard} ${scoringMode === 'flat' ? styles.scoringActive : ''}`}
+              onClick={() => setScoringMode('flat')}
+            >
+              <span className={styles.scoringIcon}>🎯</span>
+              <div className={styles.scoringText}>
+                <div className={styles.scoringTitle}>Flat / Fixed Points</div>
+                <div className={styles.scoringSub}>Exact points per correct answer (no speed bonus)</div>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Quiz Code */}
@@ -145,6 +222,33 @@ const CreateQuiz = () => {
                   value={q.question}
                   onChange={(e) => updateQuestion(qIdx, 'question', e.target.value)}
                 />
+              </div>
+
+              {/* Score / Points Level */}
+              <div className={styles.pointsBar}>
+                <label className={styles.pointsLabel}>Score Level:</label>
+                <div className={styles.pointsGroup}>
+                  {[100, 500, 1000, 2000].map((pts) => (
+                    <button
+                      key={pts}
+                      type="button"
+                      className={`${styles.pointsPill} ${q.points === pts ? styles.pointsActive : ''}`}
+                      onClick={() => updateQuestion(qIdx, 'points', pts)}
+                    >
+                      ⭐ {pts} pts
+                    </button>
+                  ))}
+                  <input
+                    type="number"
+                    min={10}
+                    max={10000}
+                    className={styles.customPointsInput}
+                    value={q.points || 1000}
+                    onChange={(e) => updateQuestion(qIdx, 'points', Math.max(10, Number(e.target.value)))}
+                    placeholder="Custom"
+                    title="Custom points for this question"
+                  />
+                </div>
               </div>
 
               {/* Options */}

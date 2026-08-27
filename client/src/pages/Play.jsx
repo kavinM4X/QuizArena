@@ -10,6 +10,8 @@ import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from './Play.module.css';
 
+const REACTIONS = ['🔥', '👏', '😂', '🎉', '🚀', '❤️'];
+
 const Play = () => {
   const { quizCode } = useParams();
   const code = quizCode?.toUpperCase();
@@ -55,7 +57,7 @@ const Play = () => {
       finally { setLoading(false); }
     };
     load();
-  }, [code]);
+  }, [code, player, navigate]);
 
   /* ── Socket events ── */
   useEffect(() => {
@@ -77,7 +79,7 @@ const Play = () => {
     const onTimer = ({ timeRemaining: t }) => setTimeRemaining(t);
     const onPaused = () => setPaused(true);
     const onResumed = () => setPaused(false);
-    const onEnded = ({ leaderboard }) => navigate(`/result/${code}`);
+    const onEnded = () => navigate(`/result/${code}`);
     const onTimerUp = () => {
       if (!submittedRef.current) {
         setSubmitted(true);
@@ -125,13 +127,60 @@ const Play = () => {
         pointsEarned: data.pointsEarned,
         correctAnswer: currentQ.correctAnswer,
       });
+
+      if (currentQ.index === currentQ.total - 1) {
+        setTimeout(() => {
+          navigate(`/result/${code}`);
+        }, 1800);
+      }
     } catch (err) {
       const msg = err.response?.data?.message || '';
       if (msg.includes('already')) {
         setResult({ isCorrect: false, pointsEarned: 0, duplicate: true });
+        if (currentQ.index === currentQ.total - 1) {
+          setTimeout(() => {
+            navigate(`/result/${code}`);
+          }, 1800);
+        }
       }
     }
-  }, [selected, currentQ, code, player, timeRemaining, duration]);
+  }, [selected, currentQ, code, player, timeRemaining, duration, navigate]);
+
+  const handleNextQuestion = useCallback(() => {
+    if (!quiz || !currentQ) return;
+    const nextIdx = currentQ.index + 1;
+    if (nextIdx < quiz.questions.length) {
+      const qObj = quiz.questions[nextIdx];
+      setCurrentQ({
+        index: nextIdx,
+        total: quiz.questions.length,
+        question: qObj.question,
+        options: qObj.options,
+        correctAnswer: qObj.correctAnswer,
+      });
+      setDuration(quiz.duration);
+      setTimeRemaining(quiz.duration);
+      setSelected(null);
+      setSubmitted(false);
+      setResult(null);
+      submittedRef.current = false;
+      startTimeRef.current = Date.now();
+      setPaused(false);
+    } else {
+      navigate(`/result/${code}`);
+    }
+  }, [quiz, currentQ, code, navigate]);
+
+  const sendReaction = (emoji) => {
+    const socket = socketRef.current;
+    if (socket) {
+      socket.emit('reaction:send', {
+        quizCode: code,
+        emoji,
+        name: player?.name || 'Player',
+      });
+    }
+  };
 
   const getOptionState = (idx) => {
     if (!submitted) return selected === idx ? 'selected' : 'idle';
@@ -157,6 +206,8 @@ const Play = () => {
       </div>
     );
   }
+
+  const isFinalQuestion = currentQ.index === currentQ.total - 1;
 
   return (
     <div className={styles.page}>
@@ -190,6 +241,21 @@ const Play = () => {
         </div>
       </div>
 
+      {/* Reactions Bar */}
+      <div className={styles.reactionBar}>
+        {REACTIONS.map((emoji) => (
+          <button
+            key={emoji}
+            type="button"
+            className={styles.reactionBtn}
+            onClick={() => sendReaction(emoji)}
+            title={`Send ${emoji}`}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+
       {/* Bottom bar */}
       <div className={styles.bottomBar}>
         {!submitted ? (
@@ -198,15 +264,40 @@ const Play = () => {
             disabled={selected === null}
             onClick={handleSubmit}
           >
-            Submit Answer
+            {isFinalQuestion ? 'Submit Final Answer →' : 'Submit Answer'}
           </Button>
         ) : (
-          <div className={`${styles.resultBanner} ${result?.isCorrect ? styles.correct : styles.wrong}`}>
-            {result?.timeUp
-              ? "⏰ Time's up!"
-              : result?.isCorrect
-              ? `✅ Correct! +${result.pointsEarned} pts`
-              : '❌ Wrong answer'}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+            <div className={`${styles.resultBanner} ${result?.isCorrect ? styles.correct : styles.wrong}`}>
+              {result?.timeUp
+                ? "⏰ Time's up!"
+                : result?.isCorrect
+                ? '✅ Correct!'
+                : '❌ Wrong answer'}
+            </div>
+
+            {!isFinalQuestion ? (
+              <Button variant="primary" onClick={handleNextQuestion}>
+                Next Question →
+              </Button>
+            ) : (
+              <div style={{
+                background: 'rgba(139, 127, 255, 0.12)',
+                border: '1px solid var(--violet)',
+                borderRadius: '10px',
+                padding: '12px 14px',
+                textAlign: 'center',
+                fontSize: '13px',
+                color: 'var(--text)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+              }}>
+                <span className="stat-dot" style={{ margin: 0 }} />
+                <span>Quiz finished! Waiting for host to reveal final leaderboard & ranks...</span>
+              </div>
+            )}
           </div>
         )}
       </div>

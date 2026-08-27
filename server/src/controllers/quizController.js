@@ -11,14 +11,24 @@ const answeredSet = new Set();
 // ─── POST /api/quiz/create ───────────────────────────────────────────────────
 const createQuiz = async (req, res) => {
   try {
-    const { title, description, duration, questions } = req.body;
-    const quizCode = await generateQuizCode();
+    const { title, description, duration, scoringMode, questions, quizCode: requestedCode } = req.body;
+
+    let quizCode = (requestedCode || '').trim().toUpperCase();
+    if (quizCode) {
+      const exists = await Quiz.exists({ quizCode });
+      if (exists) {
+        quizCode = await generateQuizCode();
+      }
+    } else {
+      quizCode = await generateQuizCode();
+    }
 
     const quiz = await Quiz.create({
       title,
       description: description || '',
       quizCode,
       duration: duration || 30,
+      scoringMode: scoringMode || 'speed',
       questions,
       createdBy: req.admin._id,
     });
@@ -30,12 +40,17 @@ const createQuiz = async (req, res) => {
   }
 };
 
+const MASTER_AVATARS = ['🦊', '🐱', '🦁', '🐶', '🐸', '🚀', '👑', '⚡', '🎯', '🔥', '🦄', '🤖', '🐼', '🐯', '🐙', '👾'];
+
 // ─── GET /api/quiz/:code ─────────────────────────────────────────────────────
 const getQuiz = async (req, res) => {
   try {
-    const quiz = await Quiz.findOne({ quizCode: req.params.code.toUpperCase() });
+    const code = req.params.code.toUpperCase();
+    const quiz = await Quiz.findOne({ quizCode: code });
     if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
-    return res.status(200).json({ success: true, quiz });
+
+    const takenAvatars = await Participant.find({ quizCode: code }).distinct('avatar');
+    return res.status(200).json({ success: true, quiz, takenAvatars });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -44,7 +59,7 @@ const getQuiz = async (req, res) => {
 // ─── POST /api/quiz/join ─────────────────────────────────────────────────────
 const joinQuiz = async (req, res) => {
   try {
-    const { quizCode, name } = req.body;
+    const { quizCode, name, avatar } = req.body;
     const code = quizCode.toUpperCase();
 
     const quiz = await Quiz.findOne({ quizCode: code });
@@ -60,7 +75,24 @@ const joinQuiz = async (req, res) => {
       return res.status(200).json({ success: true, participant: existing, reconnect: true });
     }
 
-    const participant = await Participant.create({ name: name.trim(), quizCode: code });
+    // Enforce unique avatar per quiz session
+    const takenAvatars = await Participant.find({ quizCode: code }).distinct('avatar');
+    let assignedAvatar = avatar;
+
+    if (!assignedAvatar || takenAvatars.includes(assignedAvatar)) {
+      const available = MASTER_AVATARS.filter((a) => !takenAvatars.includes(a));
+      if (available.length > 0) {
+        assignedAvatar = available[Math.floor(Math.random() * available.length)];
+      } else {
+        assignedAvatar = MASTER_AVATARS[Math.floor(Math.random() * MASTER_AVATARS.length)];
+      }
+    }
+
+    const participant = await Participant.create({
+      name: name.trim(),
+      quizCode: code,
+      avatar: assignedAvatar,
+    });
     return res.status(201).json({ success: true, participant, reconnect: false });
   } catch (error) {
     if (error.code === 11000) {
@@ -217,7 +249,9 @@ const submitAnswer = async (req, res) => {
 
     const question = quiz.questions[questionIndex];
     const isCorrect = question.correctAnswer === selectedOption;
-    const pointsEarned = isCorrect ? calculateScore(timeTaken, quiz.duration) : 0;
+    const basePoints = question?.points || 1000;
+    const scoringMode = quiz.scoringMode || 'speed';
+    const pointsEarned = isCorrect ? calculateScore(timeTaken, quiz.duration, basePoints, scoringMode) : 0;
 
     await Participant.findByIdAndUpdate(participantId, {
       $push: {
@@ -328,7 +362,7 @@ const getAdminQuizzes = async (req, res) => {
 const getParticipants = async (req, res) => {
   try {
     const code = req.params.code.toUpperCase();
-    const participants = await Participant.find({ quizCode: code }).select('name score isConnected joinedAt');
+    const participants = await Participant.find({ quizCode: code }).select('name avatar score isConnected joinedAt');
     return res.status(200).json({ success: true, participants });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -353,9 +387,45 @@ function _startTimer(io, quiz, questionIndex) {
     if (timeRemaining <= 0) {
       clearInterval(intervalId);
       delete activeTimers[code];
-      // Auto-advance or signal time-up
+
       io.to(`quiz:${code}`).emit('timer:up', { questionIndex });
       io.to(`admin:${code}`).emit('timer:up', { questionIndex });
+
+      // Automatically advance to next question (or end quiz if last question) after a 2.5s reveal buffer
+      setTimeout(async () => {
+        try {
+          const updatedQuiz = await Quiz.findOne({ quizCode: code });
+          if (!updatedQuiz || updatedQuiz.status !== 'live') return;
+
+          const nextIdx = updatedQuiz.currentQuestionIndex + 1;
+          if (nextIdx < updatedQuiz.questions.length) {
+            updatedQuiz.currentQuestionIndex = nextIdx;
+            await updatedQuiz.save();
+
+            const question = updatedQuiz.questions[nextIdx];
+            const payload = {
+              index: nextIdx,
+              total: updatedQuiz.questions.length,
+              question: question.question,
+              options: question.options,
+              duration: updatedQuiz.duration,
+            };
+            io.to(`quiz:${code}`).emit('question:changed', payload);
+            io.to(`admin:${code}`).emit('question:changed', payload);
+            _startTimer(io, updatedQuiz, nextIdx);
+          } else {
+            // Last question completed -> auto-end quiz
+            updatedQuiz.status = 'ended';
+            await updatedQuiz.save();
+
+            const leaderboard = await buildLeaderboard(code);
+            io.to(`quiz:${code}`).emit('quiz:ended', { quizCode: code, leaderboard });
+            io.to(`admin:${code}`).emit('quiz:ended', { quizCode: code, leaderboard });
+          }
+        } catch (err) {
+          console.error('Auto-advance error:', err);
+        }
+      }, 2500);
     }
   }, 1000);
 
@@ -376,8 +446,43 @@ function _resumeTimer(io, quiz, questionIndex, timeRemaining) {
     if (remaining <= 0) {
       clearInterval(intervalId);
       delete activeTimers[code];
+
       io.to(`quiz:${code}`).emit('timer:up', { questionIndex });
       io.to(`admin:${code}`).emit('timer:up', { questionIndex });
+
+      setTimeout(async () => {
+        try {
+          const updatedQuiz = await Quiz.findOne({ quizCode: code });
+          if (!updatedQuiz || updatedQuiz.status !== 'live') return;
+
+          const nextIdx = updatedQuiz.currentQuestionIndex + 1;
+          if (nextIdx < updatedQuiz.questions.length) {
+            updatedQuiz.currentQuestionIndex = nextIdx;
+            await updatedQuiz.save();
+
+            const question = updatedQuiz.questions[nextIdx];
+            const payload = {
+              index: nextIdx,
+              total: updatedQuiz.questions.length,
+              question: question.question,
+              options: question.options,
+              duration: updatedQuiz.duration,
+            };
+            io.to(`quiz:${code}`).emit('question:changed', payload);
+            io.to(`admin:${code}`).emit('question:changed', payload);
+            _startTimer(io, updatedQuiz, nextIdx);
+          } else {
+            updatedQuiz.status = 'ended';
+            await updatedQuiz.save();
+
+            const leaderboard = await buildLeaderboard(code);
+            io.to(`quiz:${code}`).emit('quiz:ended', { quizCode: code, leaderboard });
+            io.to(`admin:${code}`).emit('quiz:ended', { quizCode: code, leaderboard });
+          }
+        } catch (err) {
+          console.error('Auto-advance error:', err);
+        }
+      }, 2500);
     }
   }, 1000);
 

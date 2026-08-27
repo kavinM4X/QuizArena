@@ -7,18 +7,22 @@ const socketHandler = (io) => {
     console.log(`🔌 Socket connected: ${socket.id}`);
 
     // ─── Player: join quiz room ─────────────────────────────────────────────
-    socket.on('quiz:join', async ({ quizCode, participantId, name }) => {
+    socket.on('quiz:join', async ({ quizCode, participantId, name, avatar }) => {
       try {
         const code = quizCode.toUpperCase();
         socket.join(`quiz:${code}`);
 
+        let pDoc;
         // Update socketId
         if (participantId) {
-          await Participant.findByIdAndUpdate(participantId, {
-            socketId: socket.id,
-            isConnected: true,
-          });
+          pDoc = await Participant.findByIdAndUpdate(
+            participantId,
+            { socketId: socket.id, isConnected: true },
+            { new: true }
+          );
         }
+
+        const pAvatar = avatar || pDoc?.avatar || '🦊';
 
         // Count online participants
         const onlineCount = await Participant.countDocuments({
@@ -30,13 +34,14 @@ const socketHandler = (io) => {
         io.to(`admin:${code}`).emit('participant:joined', {
           participantId,
           name,
+          avatar: pAvatar,
           onlineCount,
         });
 
         // Broadcast updated participant count to all in quiz room
         io.to(`quiz:${code}`).emit('participant:count', { count: onlineCount });
 
-        console.log(`👤 ${name} joined quiz ${code}`);
+        console.log(`👤 ${name} (${pAvatar}) joined quiz ${code}`);
       } catch (err) {
         console.error('quiz:join error', err);
       }
@@ -49,8 +54,20 @@ const socketHandler = (io) => {
       console.log(`🛡️ Admin joined room admin:${code}`);
 
       // Send current participant list
-      const participants = await Participant.find({ quizCode: code }).select('name score isConnected');
+      const participants = await Participant.find({ quizCode: code }).select('name avatar score isConnected');
       socket.emit('participant:list', { participants });
+    });
+
+    // ─── Player: send emoji reaction ─────────────────────────────────────────
+    socket.on('reaction:send', ({ quizCode, emoji, name }) => {
+      const code = (quizCode || '').toUpperCase();
+      const reaction = {
+        id: Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+        emoji,
+        name,
+      };
+      io.to(`admin:${code}`).emit('reaction:received', reaction);
+      io.to(`quiz:${code}`).emit('reaction:received', reaction);
     });
 
     // ─── Player: submit answer ──────────────────────────────────────────────

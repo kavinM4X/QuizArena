@@ -43,6 +43,18 @@ const Dashboard = () => {
     return <span className="badge pending">Pending</span>;
   };
 
+  const handleClone = async (quizCode, e) => {
+    e.stopPropagation();
+    try {
+      const { data } = await api.get(`/quiz/${quizCode}`);
+      if (data.success && data.quiz) {
+        navigate('/create-quiz', { state: { cloneQuiz: data.quiz } });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <Navbar />
@@ -95,7 +107,26 @@ const Dashboard = () => {
                     Code {q.quizCode} · {q.participantCount || 0} players
                   </div>
                 </div>
-                {getStatusLabel(q.status)}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button
+                    style={{
+                      background: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      padding: '4px 10px',
+                      borderRadius: '7px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                    onClick={(e) => handleClone(q.quizCode, e)}
+                    title="Clone / Duplicate this quiz"
+                  >
+                    📋 Clone
+                  </button>
+                  {getStatusLabel(q.status)}
+                </div>
               </div>
             ))}
           </div>

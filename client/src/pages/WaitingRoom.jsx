@@ -29,6 +29,7 @@ const WaitingRoom = () => {
           quizCode: code,
           participantId: player.participantId,
           name: player.name,
+          avatar: player.avatar || '🦊',
         });
       }
     };
@@ -80,8 +81,9 @@ const WaitingRoom = () => {
           <span className={`${styles.codeVal} mono`}>{code}</span>
         </div>
 
-        {/* Player name */}
+        {/* Player name & avatar */}
         <div className={styles.playerBadge}>
+          <span style={{ fontSize: '20px', marginRight: '6px' }}>{player?.avatar || '🦊'}</span>
           Playing as <strong>{player?.name}</strong>
         </div>
       </div>

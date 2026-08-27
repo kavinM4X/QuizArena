@@ -1,18 +1,97 @@
 .page { min-height: 100vh; display: flex; align-items: stretch; }
 .centerCol {
   display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1;
-  justify-content: space-between; padding: 10vh 28px 36px;
+  justify-content: space-between; padding: 4vh 24px 32px;
   max-width: 440px; margin: 0 auto; width: 100%;
 }
-/* top block — no extra styles needed */
 .codeBadge {
   font-family: 'JetBrains Mono', monospace; font-size: 11px;
   padding: 4px 10px; border-radius: 7px;
   background: var(--surface-2); color: var(--mute);
-  display: inline-block; margin-bottom: 16px;
+  display: inline-block; margin-bottom: 12px;
 }
-.title { font-size: 22px; margin-bottom: 8px; }
-.sub { color: var(--mute); font-size: 14px; max-width: 260px; margin: 0 auto; }
+.title { font-size: 22px; margin-bottom: 6px; }
+.sub { color: var(--mute); font-size: 13px; max-width: 320px; margin: 0 auto 16px; }
+
+.avatarSection {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.selectedDisplay {
+  font-size: 42px;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(255, 182, 39, 0.2);
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.avatarGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  max-width: 280px;
+}
+
+.avatarTile {
+  position: relative;
+  font-size: 22px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.avatarTile:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--violet);
+  background: var(--surface-2);
+}
+
+.avatarActive {
+  border-color: var(--gold) !important;
+  background: rgba(255, 182, 39, 0.15) !important;
+  box-shadow: 0 0 0 2px var(--gold);
+  transform: scale(1.08);
+}
+
+.avatarTaken {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.takenBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  color: var(--danger);
+  font-weight: bold;
+}
+
 .bottomBlock { width: 100%; }
 .field { margin-bottom: 14px; text-align: left; }
 .label { display: block; font-size: 12px; font-weight: 600; color: var(--mute); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.06em; }

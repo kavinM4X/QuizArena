@@ -13,7 +13,10 @@ const Leaderboard = ({ entries = [], highlightName = '' }) => {
           className={`${styles.row} ${entry.name === highlightName ? styles.highlight : ''}`}
         >
           <div className={`${styles.rank} ${idx === 0 ? styles.gold : ''}`}>{entry.rank}</div>
-          <div className={styles.name}>{entry.name === highlightName ? 'You' : entry.name}</div>
+          <div className={styles.name}>
+            <span style={{ marginRight: '6px' }}>{entry.avatar || '🦊'}</span>
+            {entry.name === highlightName ? 'You' : entry.name}
+          </div>
           <div className={styles.score}>{entry.score}</div>
         </div>
       ))}

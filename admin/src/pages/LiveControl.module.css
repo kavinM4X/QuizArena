@@ -1,21 +1,100 @@
-.page { min-height: 100vh; display: flex; flex-direction: column; }
-.main { max-width: 720px; margin: 0 auto; width: 100%; padding: 24px 24px 60px; }
+.page { min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.main { max-width: 720px; margin: 0 auto; width: 100%; padding: 24px 24px 60px; z-index: 10; }
 .center { display: flex; justify-content: center; align-items: center; flex: 1; }
+
+.reactionOverlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  overflow: hidden;
+}
+
+.floatingEmoji {
+  position: absolute;
+  bottom: -40px;
+  font-size: 38px;
+  animation: floatUp 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-80px) scale(1.2) rotate(-8deg);
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-600px) scale(1) rotate(12deg);
+  }
+}
 
 .liveCodeWrap { text-align: center; padding: 20px 0 10px; }
 .liveCodeLbl { font-size: 11px; color: var(--mute); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
 .liveCodeVal { font-family: 'JetBrains Mono', monospace; font-size: 42px; font-weight: 700; letter-spacing: 0.14em; color: var(--gold); }
 
-.participantsStrip { display: flex; align-items: center; gap: 10px; justify-content: center; margin: 14px 0 22px; }
-.avatarStack { display: flex; }
-.av {
-  width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--bg);
-  margin-left: -8px; display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700;
+.participantsStrip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
 }
-.av:first-child { margin-left: 0; }
-.pCount { font-size: 14px; color: var(--mute); }
-.pCount b { color: var(--text); }
+
+.playerChipsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 600px;
+}
+
+.playerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  transition: all 0.15s ease;
+}
+
+.playerChip:hover {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.chipAvatar {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.chipName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chipDisconnected {
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+.pCount { font-size: 13px; color: var(--mute); }
+.pCount b { color: var(--gold); }
 
 .timerBar {
   display: flex; align-items: center; gap: 14px; background: var(--surface-2);

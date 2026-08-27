@@ -10,7 +10,12 @@ const Login = () => {
   const { login, register: authRegister, loading } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+
+  const handleSwitchMode = (newMode) => {
+    setMode(newMode);
+    reset();
+  };
 
   const onSubmit = async (data) => {
     let result;
@@ -78,12 +83,16 @@ const Login = () => {
           {mode === 'login' ? (
             <>
               Don't have an account?{' '}
-              <button className={styles.switchBtn} onClick={() => setMode('register')}>Register</button>
+              <button type="button" className={styles.switchBtn} onClick={() => handleSwitchMode('register')}>
+                Register
+              </button>
             </>
           ) : (
             <>
               Already have an account?{' '}
-              <button className={styles.switchBtn} onClick={() => setMode('login')}>Sign in</button>
+              <button type="button" className={styles.switchBtn} onClick={() => handleSwitchMode('login')}>
+                Sign in
+              </button>
             </>
           )}
         </div>

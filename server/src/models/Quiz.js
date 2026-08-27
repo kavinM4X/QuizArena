@@ -21,6 +21,12 @@ const questionSchema = new mongoose.Schema({
     min: 0,
     max: 3,
   },
+  points: {
+    type: Number,
+    default: 1000,
+    min: 10,
+    max: 10000,
+  },
 });
 
 const quizSchema = new mongoose.Schema(
@@ -55,6 +61,12 @@ const quizSchema = new mongoose.Schema(
       default: 30,
       min: 5,
       max: 120,
+    },
+    // speed | flat
+    scoringMode: {
+      type: String,
+      enum: ['speed', 'flat'],
+      default: 'speed',
     },
     questions: {
       type: [questionSchema],

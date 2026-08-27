@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { usePlayer } from '../context/PlayerContext';
 import Button from '../components/Button';
 import styles from './Join.module.css';
+
+const AVATARS = ['🦊', '🐱', '🦁', '🐶', '🐸', '🚀', '👑', '⚡', '🎯', '🔥', '🦄', '🤖', '🐼', '🐯', '🐙', '👾'];
 
 const Join = () => {
   const navigate = useNavigate();
@@ -13,19 +15,50 @@ const Join = () => {
   const { savePlayer } = usePlayer();
 
   const [name, setName] = useState('');
+  const [avatar, setAvatar] = useState('🦊');
+  const [takenAvatars, setTakenAvatars] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!code) return;
+    const fetchQuizDetails = async () => {
+      try {
+        const { data } = await api.get(`/quiz/${code}`);
+        const taken = data.takenAvatars || [];
+        setTakenAvatars(taken);
+
+        // Pick first untaken avatar as default
+        const available = AVATARS.find((a) => !taken.includes(a));
+        if (available) {
+          setAvatar(available);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchQuizDetails();
+  }, [code]);
 
   const handleStart = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) return toast.error('Please enter your name');
     if (trimmedName.length < 2) return toast.error('Name must be at least 2 characters');
 
+    if (takenAvatars.includes(avatar)) {
+      return toast.error('This avatar is already taken by another player! Please choose another.');
+    }
+
     setLoading(true);
     try {
-      const { data } = await api.post('/quiz/join', { quizCode: code, name: trimmedName });
+      const { data } = await api.post('/quiz/join', {
+        quizCode: code,
+        name: trimmedName,
+        avatar,
+      });
       if (data.success) {
         savePlayer({
           name: trimmedName,
+          avatar: data.participant.avatar || avatar,
           quizCode: code,
           participantId: data.participant._id,
         });
@@ -49,8 +82,31 @@ const Join = () => {
       <div className={styles.centerCol}>
         <div className={styles.topBlock}>
           <span className={styles.codeBadge}>Code: {code}</span>
-          <h1 className={styles.title}>What should we call you?</h1>
-          <p className={styles.sub}>This name will appear on the live leaderboard.</p>
+          <h1 className={styles.title}>Join Quiz Session</h1>
+          <p className={styles.sub}>Choose a unique avatar and display name for the leaderboard.</p>
+
+          {/* Avatar Selector */}
+          <div className={styles.avatarSection}>
+            <div className={styles.selectedDisplay}>{avatar}</div>
+            <div className={styles.avatarGrid}>
+              {AVATARS.map((emoji) => {
+                const isTaken = takenAvatars.includes(emoji);
+                return (
+                  <button
+                    key={emoji}
+                    type="button"
+                    disabled={isTaken}
+                    className={`${styles.avatarTile} ${avatar === emoji ? styles.avatarActive : ''} ${isTaken ? styles.avatarTaken : ''}`}
+                    onClick={() => !isTaken && setAvatar(emoji)}
+                    title={isTaken ? 'Already taken by another player' : `Select ${emoji}`}
+                  >
+                    {emoji}
+                    {isTaken && <span className={styles.takenBadge}>✕</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div className={styles.bottomBlock}>
@@ -69,7 +125,7 @@ const Join = () => {
             />
           </div>
           <Button variant="primary" loading={loading} onClick={handleStart}>
-            Start →
+            Start Game →
           </Button>
         </div>
       </div>

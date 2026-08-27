@@ -12,7 +12,10 @@ const Leaderboard = ({ entries = [] }) => {
           <div className={`${styles.rank} ${idx === 0 ? styles.gold : ''}`}>
             {idx + 1}
           </div>
-          <div className={styles.name}>{entry.name}</div>
+          <div className={styles.name}>
+            <span style={{ marginRight: '6px' }}>{entry.avatar || '🦊'}</span>
+            {entry.name}
+          </div>
           <div className={styles.score}>{entry.score}</div>
         </div>
       ))}

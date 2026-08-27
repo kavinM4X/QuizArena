@@ -25,9 +25,12 @@ const generateQuizCode = async () => {
  * @param {number} totalTime - total allowed seconds
  * @returns {number} points
  */
-const calculateScore = (timeTaken, totalTime) => {
-  const BASE_SCORE = 1000;
-  const MAX_SPEED_BONUS = 500;
+const calculateScore = (timeTaken, totalTime, basePoints = 1000, scoringMode = 'speed') => {
+  const BASE_SCORE = Number(basePoints) || 1000;
+  if (scoringMode === 'flat') {
+    return BASE_SCORE;
+  }
+  const MAX_SPEED_BONUS = Math.floor(BASE_SCORE * 0.5);
   const ratio = Math.max(0, (totalTime - timeTaken) / totalTime);
   const speedBonus = Math.floor(ratio * MAX_SPEED_BONUS);
   return BASE_SCORE + speedBonus;
@@ -38,12 +41,13 @@ const calculateScore = (timeTaken, totalTime) => {
  */
 const buildLeaderboard = async (quizCode) => {
   const participants = await Participant.find({ quizCode })
-    .select('name score answers')
+    .select('name avatar score answers')
     .sort({ score: -1, joinedAt: 1 });
 
   return participants.map((p, idx) => ({
     rank: idx + 1,
     name: p.name,
+    avatar: p.avatar || '🦊',
     score: p.score,
     correct: p.answers.filter((a) => a.isCorrect).length,
     wrong: p.answers.filter((a) => !a.isCorrect).length,

@@ -9,8 +9,6 @@ import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from './LiveControl.module.css';
 
-const AVATAR_COLORS = ['var(--violet)', 'var(--teal)', 'var(--coral)', 'var(--blue)', 'var(--gold)'];
-
 const LiveControl = () => {
   const { quizCode } = useParams();
   const navigate = useNavigate();
@@ -22,6 +20,7 @@ const LiveControl = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
   const [timeRemaining, setTimeRemaining] = useState(null);
+  const [reactions, setReactions] = useState([]);
   const socketRef = useRef(null);
 
   /* ── Fetch quiz data ── */
@@ -56,13 +55,17 @@ const LiveControl = () => {
       socket.emit('admin:join', { quizCode: code });
     });
 
-    socket.on('participant:joined', ({ name, onlineCount }) => {
+    socket.on('participant:list', ({ participants: list }) => {
+      setParticipants(list || []);
+    });
+
+    socket.on('participant:joined', ({ name, avatar, onlineCount }) => {
       setParticipants((prev) => {
         const exists = prev.find((p) => p.name === name);
-        if (!exists) return [...prev, { name, isConnected: true }];
-        return prev.map((p) => p.name === name ? { ...p, isConnected: true } : p);
+        if (!exists) return [...prev, { name, avatar: avatar || '🦊', isConnected: true }];
+        return prev.map((p) => p.name === name ? { ...p, isConnected: true, avatar: avatar || p.avatar } : p);
       });
-      toast.success(`${name} joined!`, { duration: 2000 });
+      toast.success(`${avatar || '🦊'} ${name} joined!`, { duration: 2000 });
     });
 
     socket.on('participant:left', ({ name }) => {
@@ -77,13 +80,21 @@ const LiveControl = () => {
       setTimeRemaining(t);
     });
 
+    socket.on('reaction:received', (reaction) => {
+      const rx = {
+        ...reaction,
+        left: Math.floor(Math.random() * 75) + 10,
+      };
+      setReactions((prev) => [...prev.slice(-20), rx]);
+    });
+
     socket.on('quiz:ended', () => {
       toast.success('Quiz ended!');
       navigate(`/results/${code}`);
     });
 
     return () => socket.disconnect();
-  }, [code]);
+  }, [code, navigate]);
 
   /* ── Actions ── */
   const action = async (type, label) => {
@@ -128,6 +139,16 @@ const LiveControl = () => {
   return (
     <div className={styles.page}>
       <Navbar />
+
+      {/* Floating Emoji Reactions Overlay */}
+      <div className={styles.reactionOverlay}>
+        {reactions.map((r) => (
+          <div key={r.id} className={styles.floatingEmoji} style={{ left: `${r.left}%` }}>
+            {r.emoji}
+          </div>
+        ))}
+      </div>
+
       <main className={styles.main}>
         {/* Quiz Code Display */}
         <div className={styles.liveCodeWrap}>
@@ -137,21 +158,17 @@ const LiveControl = () => {
 
         {/* Participants strip */}
         <div className={styles.participantsStrip}>
-          <div className={styles.avatarStack}>
-            {participants.slice(0, 4).map((p, i) => (
+          <div className={styles.playerChipsGrid}>
+            {participants.map((p) => (
               <div
                 key={p.name}
-                className={styles.av}
-                style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length], color: '#0B1220' }}
+                className={`${styles.playerChip} ${p.isConnected === false ? styles.chipDisconnected : ''}`}
+                title={p.name}
               >
-                {p.name[0]?.toUpperCase()}
+                <span className={styles.chipAvatar}>{p.avatar || '🦊'}</span>
+                <span className={styles.chipName}>{p.name}</span>
               </div>
             ))}
-            {participants.length > 4 && (
-              <div className={styles.av} style={{ background: 'var(--surface-2)', color: 'var(--mute)' }}>
-                +{participants.length - 4}
-              </div>
-            )}
           </div>
           <div className={styles.pCount}><b>{onlineCount}</b> joined</div>
         </div>

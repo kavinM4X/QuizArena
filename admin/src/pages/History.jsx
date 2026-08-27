@@ -87,6 +87,19 @@ const History = () => {
     });
   };
 
+  const handleClone = async (quizCode, e) => {
+    e.stopPropagation();
+    try {
+      const { data } = await api.get(`/quiz/${quizCode}`);
+      if (data.success && data.quiz) {
+        navigate('/create-quiz', { state: { cloneQuiz: data.quiz } });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load quiz for cloning');
+    }
+  };
+
   return (
     <div className={styles.page}>
       <Navbar />
@@ -200,6 +213,14 @@ const History = () => {
                 </div>
 
                 <div className={styles.actionsGroup}>
+                  <button
+                    className={styles.actionBtn}
+                    onClick={(e) => handleClone(quiz.quizCode, e)}
+                    title="Clone / Duplicate this quiz"
+                  >
+                    📋 Clone
+                  </button>
+
                   {quiz.status === 'ended' && (
                     <>
                       <button

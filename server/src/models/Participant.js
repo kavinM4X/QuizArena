@@ -21,6 +21,10 @@ const participantSchema = new mongoose.Schema(
       required: true,
       uppercase: true,
     },
+    avatar: {
+      type: String,
+      default: '🦊',
+    },
     socketId: {
       type: String,
       default: null,
