@@ -18,31 +18,37 @@ connectDB();
 // ─── Express app ─────────────────────────────────────────────────────────────
 const app = express();
 
-app.use(helmet());
+// Trust proxy for hosted platforms (Render, Railway, Heroku)
+app.set('trust proxy', 1);
+
+// ─── Bulletproof CORS ─────────────────────────────────────────────────────────
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Reflect request origin to allow all origins with credentials
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(morgan('dev'));
-
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || `${process.env.CLIENT_URL || ''},${process.env.ADMIN_URL || ''},http://localhost:5173,http://localhost:5174`)
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        // Allow origin in production to prevent deployment CORS blocks
-        callback(null, true);
-      }
-    },
-    credentials: true,
-  })
-);
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: false }));
-app.use(generalLimiter);
+
+// Rate limiter (skip preflight OPTIONS)
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') return next();
+  return generalLimiter(req, res, next);
+});
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/admin', adminRoutes);
@@ -71,10 +77,13 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
+    origin: true,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
 });
 
 // Make io available in controllers via req.app.get('io')
@@ -100,4 +109,3 @@ httpServer.on('error', (err) => {
 httpServer.listen({ port: PORT, host: '0.0.0.0', reuseAddress: true }, () => {
   console.log(`🚀 QuizArena server running on http://localhost:${PORT}`);
 });
-
