@@ -28,21 +28,11 @@ const LiveControl = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const data = await getCachedAdminData(`live_data_${code}`, async () => {
-          const [qRes, pRes, rRes] = await Promise.all([
-            api.get(`/quiz/${code}`),
-            api.get(`/quiz/${code}/participants`),
-            api.get(`/quiz/${code}/results`),
-          ]);
-          return {
-            quiz: qRes.data.quiz,
-            participants: pRes.data.participants || [],
-            leaderboard: rRes.data.leaderboard || [],
-          };
+        const data = await getCachedAdminData(`quiz_${code}`, async () => {
+          const res = await api.get(`/quiz/${code}`);
+          return res.data;
         });
         setQuiz(data.quiz);
-        setParticipants(data.participants);
-        setLeaderboard(data.leaderboard);
       } catch (err) {
         toast.error('Failed to load quiz');
       } finally {
