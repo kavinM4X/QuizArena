@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getCachedAdminData } from '../utils/adminCache';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
 import StatCard from '../components/StatCard';
@@ -22,7 +23,10 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const { data } = await api.get('/quiz/');
+        const data = await getCachedAdminData('admin_quizzes', async () => {
+          const res = await api.get('/quiz/');
+          return res.data;
+        });
         setQuizzes(data.quizzes || []);
       } catch (err) {
         console.error(err);

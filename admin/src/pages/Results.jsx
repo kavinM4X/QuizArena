@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import { getCachedAdminData } from '../utils/adminCache';
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -23,7 +24,10 @@ const Results = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const { data } = await api.get(`/quiz/${code}/results`);
+        const data = await getCachedAdminData(`results_${code}`, async () => {
+          const res = await api.get(`/quiz/${code}/results`);
+          return res.data;
+        });
         setQuiz(data.quiz);
         setLeaderboard(data.leaderboard || []);
       } catch (err) {

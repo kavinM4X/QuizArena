@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import { getCachedAdminData } from '../utils/adminCache';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -18,7 +19,10 @@ const History = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const { data } = await api.get('/quiz/');
+        const data = await getCachedAdminData('admin_quizzes', async () => {
+          const res = await api.get('/quiz/');
+          return res.data;
+        });
         setQuizzes(data.quizzes || []);
       } catch (err) {
         console.error('Fetch history error:', err);

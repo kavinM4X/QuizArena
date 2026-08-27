@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import { getCachedAdminData } from '../utils/adminCache';
 import Navbar from '../components/Navbar';
 import Leaderboard from '../components/Leaderboard';
 import Button from '../components/Button';
@@ -27,14 +28,21 @@ const LiveControl = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const [qRes, pRes, rRes] = await Promise.all([
-          api.get(`/quiz/${code}`),
-          api.get(`/quiz/${code}/participants`),
-          api.get(`/quiz/${code}/results`),
-        ]);
-        setQuiz(qRes.data.quiz);
-        setParticipants(pRes.data.participants || []);
-        setLeaderboard(rRes.data.leaderboard || []);
+        const data = await getCachedAdminData(`live_data_${code}`, async () => {
+          const [qRes, pRes, rRes] = await Promise.all([
+            api.get(`/quiz/${code}`),
+            api.get(`/quiz/${code}/participants`),
+            api.get(`/quiz/${code}/results`),
+          ]);
+          return {
+            quiz: qRes.data.quiz,
+            participants: pRes.data.participants || [],
+            leaderboard: rRes.data.leaderboard || [],
+          };
+        });
+        setQuiz(data.quiz);
+        setParticipants(data.participants);
+        setLeaderboard(data.leaderboard);
       } catch (err) {
         toast.error('Failed to load quiz');
       } finally {
